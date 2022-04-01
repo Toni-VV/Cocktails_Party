@@ -8,18 +8,26 @@
 import Foundation
 
 struct Response: Decodable {
-    var coctails: [Coctail]
+    var cocktails: [Cocktail]
     
     enum CodingKeys: String, CodingKey {
-        case coctails = "drinks"
+        case cocktails = "drinks"
     }
 }
 
-struct Coctail: Decodable {
-    let name: String
+struct Cocktail: Decodable {
+    var name: String
+    var isSelected: Bool
     
     enum CodingKeys: String, CodingKey {
         case name = "strDrink"
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let name = try container.decode(String.self, forKey: .name)
+        self.name = name
+        self.isSelected = false
     }
 }
 

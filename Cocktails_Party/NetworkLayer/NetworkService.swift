@@ -9,7 +9,7 @@ import Foundation
 import Alamofire
 
 protocol CocktailServiceProtocol {
-    typealias CocktailResponse = ((Result<Response, APIError>) -> Void)
+    typealias CocktailResponse = ((Result<[Cocktail], APIError>) -> Void)
     
     func fetchCoctails(endPoint: [String: String], completionHandler: @escaping CocktailResponse)
 }
@@ -21,11 +21,12 @@ struct NetworkService: CocktailServiceProtocol {
             completionHandler(.failure(.invalidURL))
             return
         }
+        
         AF.request(url).validate().responseDecodable(of: Response.self) { response in
             switch response.result {
-            case .success(let cocktails):
-                completionHandler(.success(cocktails))
-            case .failure(_ ):
+            case .success(let response):
+                completionHandler(.success(response.cocktails))
+            case .failure(_):
                 completionHandler(.failure(.invalidData))
             }
         }
