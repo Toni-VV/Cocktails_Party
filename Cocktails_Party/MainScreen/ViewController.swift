@@ -32,7 +32,6 @@ final class ViewController: UIViewController {
         
     }()
     
-    
     private let cocktailTextField: UITextField = {
         let textField = UITextField()
         textField.placeholder = "Cocktail name"
@@ -57,7 +56,7 @@ final class ViewController: UIViewController {
         presenter.fetchCocktails()
         addObservers()
     }
-    
+
     deinit {
         NotificationCenter.default.removeObserver(self,
                                                   name: UIResponder.keyboardWillShowNotification,
@@ -68,6 +67,10 @@ final class ViewController: UIViewController {
     }
     
     // MARK: - Override Methods
+   
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+            view.endEditing(true)
+    }
 
 }
 

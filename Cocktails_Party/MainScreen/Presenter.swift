@@ -7,6 +7,8 @@
 
 import Foundation
 
+//MARK: - Protocols
+
 protocol ViewInputProtocol: AnyObject {
     func reloadView()
     func showAlert(message: String)
@@ -17,6 +19,8 @@ protocol PresenterProtocol {
     var cocktails: [Cocktail] { get }
     func fetchCocktails()
 }
+
+//MARK: - Presenter
 
 final class Presenter: PresenterProtocol {
     
