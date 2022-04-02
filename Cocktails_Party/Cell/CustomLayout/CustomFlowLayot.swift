@@ -8,7 +8,7 @@
 import UIKit
 
 final class CustomFlowLayot: UICollectionViewFlowLayout {
-    
+
     override func layoutAttributesForElements(
         in rect: CGRect
     ) -> [UICollectionViewLayoutAttributes]? {

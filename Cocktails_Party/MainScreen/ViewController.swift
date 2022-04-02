@@ -10,15 +10,19 @@ import SnapKit
 
 final class ViewController: UIViewController {
     
+    // MARK: - Properties
+    
     var presenter: PresenterProtocol!
 
    private let collectionView: UICollectionView = {
         let collectionViewFlowLAyout = CustomFlowLayot()
-//       collectionViewFlowLAyout.scrollDirection = .vertical
        collectionViewFlowLAyout.estimatedItemSize = UICollectionViewFlowLayout.automaticSize
        collectionViewFlowLAyout.minimumInteritemSpacing = 8
        collectionViewFlowLAyout.minimumLineSpacing = 8
-       collectionViewFlowLAyout.sectionInset = UIEdgeInsets(top: 20, left: 20, bottom: 20, right: 20)
+       collectionViewFlowLAyout.sectionInset = UIEdgeInsets(top: 20,
+                                                            left: 20,
+                                                            bottom: 20,
+                                                            right: 20)
        
         let collectionView = UICollectionView(frame: .zero,
                                               collectionViewLayout: collectionViewFlowLAyout)
@@ -47,6 +51,7 @@ final class ViewController: UIViewController {
         return textField
     }()
 
+    // MARK: - Life Cycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -55,8 +60,6 @@ final class ViewController: UIViewController {
         setupCollectionView()
         presenter.fetchCocktails()
     }
-    
-    
     
 }
 
@@ -70,7 +73,7 @@ private extension ViewController {
         collectionView.dataSource = self
         collectionView.allowsMultipleSelection = true
 
-        let height = view.bounds.height / 1.5
+        let height = view.bounds.height / 1.8
 
         collectionView.snp.makeConstraints {
             $0.leading.trailing.equalToSuperview()
@@ -91,28 +94,27 @@ private extension ViewController {
         }
     }
     
-    
-
-    
 }
 
 //MARK: - UICollectionViewDataSource
 
 extension ViewController: UICollectionViewDataSource {
     
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+    func collectionView(_ collectionView: UICollectionView,
+                        numberOfItemsInSection section: Int) -> Int {
         presenter.cocktails.isEmpty ? 0: presenter.cocktails.count
     }
     
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+    func collectionView(_ collectionView: UICollectionView,
+                        cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard
             let cell = collectionView.dequeueReusableCell(
                 withReuseIdentifier: CustomCell.identifier,
                 for: indexPath
             ) as? CustomCell
         else { return UICollectionViewCell() }
-        let cocktail = presenter.cocktails[indexPath.row]
         
+        let cocktail = presenter.cocktails[indexPath.row]
         cell.configure(with: cocktail)
     
         return cell
@@ -120,20 +122,29 @@ extension ViewController: UICollectionViewDataSource {
     
 }
 
+// MARK: - UICollectionViewDelegate
+
 extension ViewController: UICollectionViewDelegate {
     
-    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+    func collectionView(_ collectionView: UICollectionView,
+                        didSelectItemAt indexPath: IndexPath) {
         var cocktail = presenter.cocktails[indexPath.row]
         cocktail.isSelected.toggle()
-        
     }
+    
 }
 
+// MARK: - ViewInputProtocol
+
 extension ViewController: ViewInputProtocol {
+    
+    func showAlert(message: String) {
+        showAlert(with: message)
+    }
+    
     func reloadView() {
         collectionView.reloadData()
     }
-    
     
 }
 
@@ -146,30 +157,26 @@ extension ViewController: UITextFieldDelegate {
         return true
     }
     
-//    func textField(_ textField: UITextField,
-//                   shouldChangeCharactersIn range: NSRange,
-//                   replacementString string: String) -> Bool {
-//        
-//        guard let textFieldText = textField.text, !textFieldText.isEmpty else {
-//            return false
-//        }
-//        
-//        let text = textFieldText.replacingCharacters(in: Range(range, in: textFieldText)!,
-//                                                     with: string).lowercased()
-//        for (index, cocktail) in presenter.cocktails.enumerated() {
-//            let cocktailName = cocktail.name.lowercased()
-//            let indexPath = IndexPath(row: index, section: 0)
-//            if cocktailName.contains(text) {
-//                collectionView.selectItem(at: indexPath,
-//                                          animated: true,
-//                                          scrollPosition: .centeredHorizontally)
-//            } else {
-//                collectionView.deselectItem(at: indexPath, animated: true)
-//            }
-//        }
-//        return true
-//    }
+    func textField(_ textField: UITextField,
+                   shouldChangeCharactersIn range: NSRange,
+                   replacementString string: String) -> Bool {
+        
+        let textFieldText = textField.text ?? ""
+        let text = textFieldText.replacingCharacters(in: Range(range,
+                                                               in: textFieldText)!,
+                                                     with: string).lowercased()
+        for (index, cocktail) in presenter.cocktails.enumerated() {
+            let cocktailName = cocktail.name.lowercased()
+            let indexPath = IndexPath(row: index, section: 0)
+            if cocktailName.contains(text) {
+                collectionView.selectItem(at: indexPath,
+                                          animated: true,
+                                          scrollPosition: .centeredHorizontally)
+            } else {
+                collectionView.deselectItem(at: indexPath, animated: true)
+            }
+        }
+        return true
+    }
     
 }
-
-

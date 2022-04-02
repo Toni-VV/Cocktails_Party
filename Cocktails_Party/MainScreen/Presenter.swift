@@ -9,9 +9,10 @@ import Foundation
 
 protocol ViewInputProtocol: AnyObject {
     func reloadView()
+    func showAlert(message: String)
 }
 
-protocol PresenterProtocol: AnyObject {
+protocol PresenterProtocol {
     init(view: ViewInputProtocol, networkService: CocktailServiceProtocol)
     var cocktails: [Cocktail] { get }
     func fetchCocktails()
@@ -28,8 +29,6 @@ final class Presenter: PresenterProtocol {
         self.networkService = networkService
     }
     
-    
-    
     func fetchCocktails() {
         networkService.fetchCoctails(endPoint: API.nonAlcoEndPoint) { result in
             switch result {
@@ -38,9 +37,10 @@ final class Presenter: PresenterProtocol {
                 DispatchQueue.main.async {
                     self.view.reloadView()
                 }
-            case .failure(let error):
-                print("Fetch Data eror: \(error.localizedDescription)")
+            case .failure(_ ):
+                self.view.showAlert(message: "Check your network connection")
             }
         }
     }
+    
 }
