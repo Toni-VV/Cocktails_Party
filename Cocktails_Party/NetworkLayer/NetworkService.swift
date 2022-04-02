@@ -32,6 +32,8 @@ struct NetworkService: CocktailServiceProtocol {
         }
     }
     
+    // MARK: - private functions
+    
     private func createBaseURL(with endPoint: [String: String]) -> URL? {
         var urlComponents = self.createURLComponents()
         let queryItem = endPoint.map { URLQueryItem(name: $0, value: $1) }

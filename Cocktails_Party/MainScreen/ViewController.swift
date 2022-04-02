@@ -13,44 +13,40 @@ final class ViewController: UIViewController {
     // MARK: - Properties
     
     var presenter: PresenterProtocol!
-
-   private let collectionView: UICollectionView = {
+    
+    private let collectionView: UICollectionView = {
         let collectionViewFlowLAyout = CustomFlowLayot()
-       collectionViewFlowLAyout.estimatedItemSize = UICollectionViewFlowLayout.automaticSize
-       collectionViewFlowLAyout.minimumInteritemSpacing = 8
-       collectionViewFlowLAyout.minimumLineSpacing = 8
-       collectionViewFlowLAyout.sectionInset = UIEdgeInsets(top: 20,
-                                                            left: 20,
-                                                            bottom: 20,
-                                                            right: 20)
-       
+        collectionViewFlowLAyout.estimatedItemSize = UICollectionViewFlowLayout.automaticSize
+        collectionViewFlowLAyout.minimumInteritemSpacing = 8
+        collectionViewFlowLAyout.minimumLineSpacing = 8
+        collectionViewFlowLAyout.sectionInset = UIEdgeInsets(top: 20,
+                                                             left: 20,
+                                                             bottom: 20,
+                                                             right: 20)
+        
         let collectionView = UICollectionView(frame: .zero,
                                               collectionViewLayout: collectionViewFlowLAyout)
         collectionView.register(CustomCell.self,
                                 forCellWithReuseIdentifier: CustomCell.identifier)
         return collectionView
-
+        
     }()
-
+    
     
     private let cocktailTextField: UITextField = {
         let textField = UITextField()
-        textField.translatesAutoresizingMaskIntoConstraints = false
         textField.placeholder = "Cocktail name"
         textField.font = .systemFont(ofSize: 15)
         textField.textAlignment = .center
-        textField.backgroundColor = .blue
         textField.returnKeyType = .done
         textField.layer.borderWidth = 2
         textField.layer.borderColor = UIColor.systemGray.cgColor
-        textField.layer.shadowOpacity = 2
         textField.layer.shadowRadius = 2
-        textField.layer.cornerRadius = 8
-        textField.layer.shadowOffset = CGSize(width: 1, height: 2)
+        textField.layer.cornerRadius = 10
         textField.layer.shadowColor = UIColor.gray.cgColor
         return textField
     }()
-
+    
     // MARK: - Life Cycle
     
     override func viewDidLoad() {
@@ -59,39 +55,86 @@ final class ViewController: UIViewController {
         setupTextField()
         setupCollectionView()
         presenter.fetchCocktails()
+        addObservers()
     }
     
+    deinit {
+        NotificationCenter.default.removeObserver(self,
+                                                  name: UIResponder.keyboardWillShowNotification,
+                                                  object: nil)
+        NotificationCenter.default.removeObserver(self,
+                                                  name: UIResponder.keyboardWillHideNotification,
+                                                  object: nil)
+    }
+    
+    // MARK: - Override Methods
+
 }
 
 //MARK: - Private Functions
 
 private extension ViewController {
-
+    
+    //MARK: - Setup
+    
     func setupCollectionView() {
         view.addSubview(collectionView)
         collectionView.delegate = self
         collectionView.dataSource = self
         collectionView.allowsMultipleSelection = true
-
+        
         let height = view.bounds.height / 1.8
-
+        
         collectionView.snp.makeConstraints {
             $0.leading.trailing.equalToSuperview()
             $0.top.equalToSuperview().inset(view.safeAreaInsets.top)
             $0.height.equalTo(height)
         }
-
+        
     }
     
     func setupTextField() {
         view.addSubview(cocktailTextField)
         cocktailTextField.delegate = self
-
+        
         cocktailTextField.snp.makeConstraints {
-            $0.left.right.equalToSuperview()
+            $0.left.right.equalToSuperview().inset(30)
             $0.bottom.equalToSuperview().inset(100)
             $0.height.equalTo(40)
         }
+    }
+    
+    //MARK: - Observers
+    
+    func addObservers() {
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow),
+                                               name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide),
+                                               name: UIResponder.keyboardWillHideNotification, object: nil)
+    }
+    
+    @objc  func keyboardWillShow(notification: NSNotification) {
+        if let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue {
+            let keyboardRectangle = keyboardFrame.cgRectValue
+            cocktailTextField.snp.remakeConstraints {
+                $0.left.equalToSuperview()
+                $0.right.equalToSuperview()
+                $0.bottom.equalToSuperview().inset(keyboardRectangle.height)
+                $0.height.equalTo(30)
+            }
+            cocktailTextField.layer.cornerRadius = 0
+            view.layoutIfNeeded()
+        }
+    }
+    
+    @objc  func keyboardWillHide() {
+        cocktailTextField.snp.remakeConstraints {
+            $0.leading.trailing.equalToSuperview().inset(30)
+            $0.bottom.equalToSuperview().inset(100)
+            $0.height.equalTo(30)
+        }
+        cocktailTextField.layer.cornerRadius = 10
+        view.layoutIfNeeded()
     }
     
 }
@@ -116,7 +159,7 @@ extension ViewController: UICollectionViewDataSource {
         
         let cocktail = presenter.cocktails[indexPath.row]
         cell.configure(with: cocktail)
-    
+        
         return cell
     }
     

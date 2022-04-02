@@ -28,6 +28,8 @@ final class CustomCell: UICollectionViewCell {
         gradient.endPoint = CGPoint(x: 0, y: 1)
         return gradient
     }()
+    
+    // MARK: - init
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -38,6 +40,8 @@ final class CustomCell: UICollectionViewCell {
         fatalError("init(coder:) has not been implemented")
     }
 
+    // MARK: - Override methods
+    
     override func layoutSubviews() {
         super.layoutSubviews()
         gradientLayer.frame = contentView.bounds
@@ -49,10 +53,11 @@ final class CustomCell: UICollectionViewCell {
         }
     }
     
+    // MARK: - Functions
+    
     func configure(with model: Cocktail) {
         isSelected =  model.isSelected
         nameLabel.text = model.name
-        
     }
 
 }
