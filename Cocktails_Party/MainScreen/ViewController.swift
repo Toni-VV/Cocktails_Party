@@ -11,6 +11,23 @@ import SnapKit
 final class ViewController: UIViewController {
     
     var presenter: PresenterProtocol!
+
+   private let collectionView: UICollectionView = {
+        let collectionViewFlowLAyout = CustomFlowLayot()
+//       collectionViewFlowLAyout.scrollDirection = .vertical
+       collectionViewFlowLAyout.estimatedItemSize = UICollectionViewFlowLayout.automaticSize
+       collectionViewFlowLAyout.minimumInteritemSpacing = 8
+       collectionViewFlowLAyout.minimumLineSpacing = 8
+       collectionViewFlowLAyout.sectionInset = UIEdgeInsets(top: 20, left: 20, bottom: 20, right: 20)
+       
+        let collectionView = UICollectionView(frame: .zero,
+                                              collectionViewLayout: collectionViewFlowLAyout)
+        collectionView.register(CustomCell.self,
+                                forCellWithReuseIdentifier: CustomCell.identifier)
+        return collectionView
+
+    }()
+
     
     private let cocktailTextField: UITextField = {
         let textField = UITextField()
@@ -29,19 +46,7 @@ final class ViewController: UIViewController {
         textField.layer.shadowColor = UIColor.gray.cgColor
         return textField
     }()
-    
-    private let collectionView: UICollectionView = {
-        let layout = CustomFlowLayout()
-        layout.estimatedItemSize = UICollectionViewFlowLayout.automaticSize
-        
-        let collectionView = UICollectionView(frame: .zero,
-                                              collectionViewLayout: layout)
-        collectionView.register(CustomCell.self,
-                                forCellWithReuseIdentifier: CustomCell.identifier)
-        collectionView.translatesAutoresizingMaskIntoConstraints = false
-        
-        return collectionView
-    }()
+
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -58,31 +63,36 @@ final class ViewController: UIViewController {
 //MARK: - Private Functions
 
 private extension ViewController {
-    
+
     func setupCollectionView() {
         view.addSubview(collectionView)
-        collectionView.dataSource = self
         collectionView.delegate = self
-        
-        let height = view.bounds.height / 1.8
-        
+        collectionView.dataSource = self
+        collectionView.allowsMultipleSelection = true
+
+        let height = view.bounds.height / 1.5
+
         collectionView.snp.makeConstraints {
             $0.leading.trailing.equalToSuperview()
             $0.top.equalToSuperview().inset(view.safeAreaInsets.top)
             $0.height.equalTo(height)
         }
+
     }
     
     func setupTextField() {
         view.addSubview(cocktailTextField)
         cocktailTextField.delegate = self
-        
+
         cocktailTextField.snp.makeConstraints {
             $0.left.right.equalToSuperview()
             $0.bottom.equalToSuperview().inset(100)
-            $0.height.equalTo(60)
+            $0.height.equalTo(40)
         }
     }
+    
+    
+
     
 }
 
@@ -102,7 +112,9 @@ extension ViewController: UICollectionViewDataSource {
             ) as? CustomCell
         else { return UICollectionViewCell() }
         let cocktail = presenter.cocktails[indexPath.row]
+        
         cell.configure(with: cocktail)
+    
         return cell
     }
     
@@ -111,10 +123,8 @@ extension ViewController: UICollectionViewDataSource {
 extension ViewController: UICollectionViewDelegate {
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        collectionView.deselectItem(at: indexPath, animated: true)
-        var item = presenter.cocktails[indexPath.row]
-        item.isSelected.toggle()
-        collectionView.reloadItems(at: [indexPath])
+        var cocktail = presenter.cocktails[indexPath.row]
+        cocktail.isSelected.toggle()
         
     }
 }
@@ -136,29 +146,29 @@ extension ViewController: UITextFieldDelegate {
         return true
     }
     
-    func textField(_ textField: UITextField,
-                   shouldChangeCharactersIn range: NSRange,
-                   replacementString string: String) -> Bool {
-        
-        guard let textFieldText = textField.text, !textFieldText.isEmpty else {
-            return false
-        }
-        
-        let text = textFieldText.replacingCharacters(in: Range(range, in: textFieldText)!,
-                                                     with: string).lowercased()
-        for (index, cocktail) in presenter.cocktails.enumerated() {
-            let cocktailName = cocktail.name.lowercased()
-            let indexPath = IndexPath(row: index, section: 0)
-            if cocktailName.contains(text) {
-                collectionView.selectItem(at: indexPath,
-                                          animated: true,
-                                          scrollPosition: .centeredHorizontally)
-            } else {
-                collectionView.deselectItem(at: indexPath, animated: true)
-            }
-        }
-        return true
-    }
+//    func textField(_ textField: UITextField,
+//                   shouldChangeCharactersIn range: NSRange,
+//                   replacementString string: String) -> Bool {
+//        
+//        guard let textFieldText = textField.text, !textFieldText.isEmpty else {
+//            return false
+//        }
+//        
+//        let text = textFieldText.replacingCharacters(in: Range(range, in: textFieldText)!,
+//                                                     with: string).lowercased()
+//        for (index, cocktail) in presenter.cocktails.enumerated() {
+//            let cocktailName = cocktail.name.lowercased()
+//            let indexPath = IndexPath(row: index, section: 0)
+//            if cocktailName.contains(text) {
+//                collectionView.selectItem(at: indexPath,
+//                                          animated: true,
+//                                          scrollPosition: .centeredHorizontally)
+//            } else {
+//                collectionView.deselectItem(at: indexPath, animated: true)
+//            }
+//        }
+//        return true
+//    }
     
 }
 
